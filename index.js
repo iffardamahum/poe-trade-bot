@@ -29,11 +29,10 @@ async function data() {
   console.log(globalCookie);
   console.log(globalItem);
   // console.log(globalType);
-
 }
 data();
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
+const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 
 // 2. Bikin Object Bot (Inisialisasi)
