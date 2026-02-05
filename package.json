@@ -2,8 +2,9 @@
   "name": "discord-belajar",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
+    "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,7 +13,14 @@
   "type": "commonjs",
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",
+    "axios": "^1.13.4",
     "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "open": "^8.4.2",
+    "python-dotenv": "^0.0.1-security",
+    "robotjs": "^0.6.0"
+  },
+  "devDependencies": {
+    "electron": "^40.1.0"
   }
 }

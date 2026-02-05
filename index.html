@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<body style="background: #1a1a1a; color: white; text-align: center; font-family: sans-serif; padding: 20px;">
+    <div style="border: 2px solid #e2ad52; padding: 15px; border-radius: 10px; background: #222;">
+        <h3 style="color: #e2ad52; margin: 0;">PoE 2 Sniper</h3>
+        <p id="status">SCANNING DATABASE...</p>
+        <button id="tpBtn"
+            style="width: 100%; padding: 12px; font-weight: bold; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer;">WAITING
+            FOR ITEM</button>
+    </div>
+
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+
+        ipcRenderer.on('update-trade', (event, data) => {
+            const btn = document.getElementById('tpBtn');
+            btn.innerHTML = `✈️ TELEPORT KE ${data.seller}`;
+
+            btn.onclick = () => {
+                // Kita bersihin tokennya dari spasi yang mungkin nyelip
+                const cleanToken = data.token.trim();
+                const url = `poe://trade/hideout/${cleanToken}`;
+
+                console.log("Mencoba URL:", url);
+
+                // Cara 1: Standard Electron
+                shell.openExternal(url).then(() => {
+                    console.log("Protokol berhasil dipanggil!");
+                }).catch((err) => {
+                    console.error("Gagal panggil protokol:", err);
+                    // Cara 2: Backup kalau shell gagal
+                    require('child_process').exec(`start ${url}`);
+                });
+            };
+        });
+    </script>
+</body>
+
+</html>

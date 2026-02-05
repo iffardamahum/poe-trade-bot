@@ -2,8 +2,11 @@
 require('dotenv').config(); // Biar Node.js bisa baca file .env
 const supabase = require('./supabaseclient');
 console.log("URL:", supabase.supabaseUrl);
-
+const WebSocket = require('ws');
 const { getMyItem } = require('./Item');
+const axios = require('axios');
+
+
 // // async function testitem(){
 // //   const Itemgww = await getMyItem();
 // //   console.log("nama item: ", Itemgww.itemName);
@@ -20,19 +23,24 @@ const { getMyCookie } = require('./dbService');
 // C1();
 
 let globalCookie = null;
-let globalItem, globalType = null;
+let globalItem = null;
 
 async function data() {
   globalCookie = await getMyCookie()
   globalItem = await getMyItem()
-  globalType = await getMyItem()
   console.log(globalCookie);
   console.log(globalItem);
   // console.log(globalType);
 }
 data();
 
+let globalqueryID = "";
+let lastToken = "";
+
 const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+// const { start } = require('repl');
+// const { link } = require('fs');
+// const { error } = require('console');
 
 
 // 2. Bikin Object Bot (Inisialisasi)
@@ -44,13 +52,25 @@ const client = new Client({
   ]
 });
 
+async function sendToOverlay(sellerName, hideoutToken) {
+    const { error } = await supabase
+        .from('trade') // Nama tabel sesuai screenshot lo
+        .insert([
+            { seller_name: sellerName, hideout_token: hideoutToken }
+        ]);
+
+    if (error) console.log("Gagal lapor ke Supabase:", error.message);
+    else console.log(`🚀 Sinyal dikirim ke Overlay! Seller: ${sellerName}`);
+};
+
+
 // 3. Event: Pas Bot berhasil Online
 
 client.once('ready', () => {
   console.log(`Mantap Bro! Bot ${client.user.tag} udah bangun!`);
 });
 
-client.on('messageCreate', async (message) => { // Tambahin 'async' di sini
+client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
   if (message.content === '!ping') {
@@ -58,23 +78,7 @@ client.on('messageCreate', async (message) => { // Tambahin 'async' di sini
   }
 
   if (message.content === '9') {
-
-    // const myCookie = await getMyCookie();
-    // console.log("POESESSID: ", myCookie);
-
-    // if (!myCookie) {
-    //   return message.reply("gagal");
-    // }
-
-    // const Itemgw = await getMyItem();
-    // console.log("Nama Item Yang diambil: ", Itemgw.itemName);
-    // console.log("Nama Type Yang diambil: ", Itemgw.itemType);
-
-
-    // if (!Itemgw) {
-    //   return message.reply("gagal ambil item dari database.")
-    // }
-
+    const WebSocket = require('ws');
     message.reply('🔍 Lagi nyari barang di Path of Exile 2 Trade...');
     try {
       let response = await fetch("https://www.pathofexile.com/api/trade2/search/poe2/Fate%20of%20the%20Vaal", {
@@ -83,48 +87,42 @@ client.on('messageCreate', async (message) => { // Tambahin 'async' di sini
           "Content-Type": "application/json",
           "Accept": "*/*",
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Cookie": `${globalCookie}` // <-- Pastikan ini POESESSID terbaru dari browser lo!
+          "Cookie": globalCookie.POESESSID
         },
         body: JSON.stringify({
           "query": {
-            "status": { "option": "online" },
+            "status": { "option": "securable" },
             "name": `${globalItem.itemName}`,
             "type": `${globalItem.itemType}`,
             "filters": {
-              "misc_filters": {
-                "filters": {
-                  // "identified": { "option": "true" },
-                  // "desecrated": { "option": "false" },
-                  // "corrupted": { "option": "false" },
-
-
-                }
+              "trade_filters": {
+                "filters": {}
               }
             }
           },
-
         })
       });
+      
 
       const data = await response.json();
       if (data.result && data.result.length > 0) {
-        const queryId = data.id;
+        globalqueryID = data.id;
+        console.log("globalquery= ", globalqueryID);
         const league = encodeURIComponent("Fate of the Vaal");
-        // const itemIds = data.result.slice(0, 5).join('\n');
         const row = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
               .setLabel('Cek di Browser 🚀')
-              .setURL(`https://www.pathofexile.com/trade2/search/poe2/${league}/${queryId}`)
+              .setURL(`https://www.pathofexile.com/trade2/search/poe2/${league}/${globalqueryID}`)
               .setStyle(ButtonStyle.Link),
             new ButtonBuilder()
               .setLabel('Livesearch')
-              .setURL(`https://www.pathofexile.com/trade2/search/poe2/${league}/${queryId}/live`)
-              .setStyle(ButtonStyle.Link)
+              .setURL(`https://www.pathofexile.com/trade2/search/poe2/${league}/${globalqueryID}/live`)
+              .setStyle(ButtonStyle.Link),
           );
 
         message.reply({
-          content: `✅ Ketemu! Query ID: \`${queryId}\`\nSilakan klik tombol di bawah buat liat harganya:`,
+          content: `✅ Ketemu! Query ID: \`${globalqueryID}\`\nSilakan klik tombol di bawah buat liat harganya:`,
           components: [row]
         });
       } else {
@@ -135,12 +133,128 @@ client.on('messageCreate', async (message) => { // Tambahin 'async' di sini
       message.reply('ERR: Gagal nembak API. Cek terminal lo!');
     }
   }
-});
+  
 
-// ... (client.login tetep sama)
-//
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
 
 
+  if (message.content === '7') {
+    message.reply('🔍 Lagi nyari barang di Path of Exile 2 Trade...');
+    let URL = `wss://www.pathofexile.com/api/trade2/live/poe2/Fate%20of%20the%20Vaal/${globalqueryID}`;
+    console.log(globalCookie);
+    try {
+      const WebSocket = require('ws'); // Pastikan dideklarasi
+      let ws = new WebSocket(URL, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Origin": "https://www.pathofexile.com",
+          "Cookie": `POESESSID=${globalCookie.POESESSID}`
+        },
+      });
 
-// 5. Login pake token yang ada di .env
+      ws.on('open', () => {
+        console.log('Live search ok, lagi mantengin');
+      });
+
+      ws.on('message', async (data) => {
+        try {
+          const response = JSON.parse(data);
+          if (response.result) {
+            const itemTicket = response.result;
+            const fetchURL = `https://www.pathofexile.com/api/trade2/fetch/${itemTicket}?query=${globalqueryID}`;
+
+            const detailRes = await fetch(fetchURL, {
+              method: 'GET',
+              headers: {
+                "Cookie": `POESESSID=${globalCookie.POESESSID}` ,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+                "Referer": `https://www.pathofexile.com/trade/search/poe2/${globalqueryID}`
+              }
+            });
+
+            const detailData = await detailRes.json();
+            const item = detailData.result[0];
+
+            if (item) {
+              const sellerName = item.listing.account.name;
+              const priceAmount = item.listing.price.amount;
+              const priceCurrency = item.listing.price.currency;
+              const itemDisplayName = item.item.name || item.item.typeLine;
+              const hideoutToken = item.listing.hideout_token;
+              await sendToOverlay(sellerName, hideoutToken);
+         
+              lastToken = hideoutToken;
+
+              // Console log biar lo tau barangnya masuk
+              console.log(`Barang Masuk: ${itemDisplayName} - ${priceAmount} ${priceCurrency}`);
+
+              // const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+              // Di dalem if (item)
+              // const row = new ActionRowBuilder()
+              //   .addComponents(
+              //     new ButtonBuilder()
+              //       .setCustomId('gas_loncat') // Kita titip tokennya di sini
+              //       .setLabel(`✈️ TRAVEL TO ${sellerName}`)
+              //       .setStyle(ButtonStyle.Primary), // Pake tombol biru biasa, bukan Link
+              //   );
+
+              // message.channel.send({ content: `Ketemu barang!`, components: [row] });
+
+              // await message.channel.send({
+              //   content: `📦 **BARANG MASUK!**\n` +
+              //    `Seller: \`${sellerName}\`\n` +
+              //    `Harga: ${item.listing.price.amount} ${item.listing.price.currency}\n\n` +
+              //    `**KLIK LINK DI BAWAH BUAT TP:**\n` +
+              //    `<${tpLink}>` // Pake kurung siku biar gak jadi embed biru yang aneh
+              // })
+            }
+          }
+        } catch (err) {
+          console.error("Gagal unboxing:", err);
+        }
+      });
+
+      ws.on('error', (err) => console.error('WS Error:', err));
+
+    } catch (error) {
+      console.error("Init Error:", error);
+    }
+  }
+}),
+// client.on('interactionCreate', async (interaction) => {
+//     if (!interaction.isButton()) return;
+
+//     if (interaction.customId === 'gas_loncat') {
+//         // Biar Discord gak 'Interaction Failed'
+//         await interaction.deferUpdate().catch(() => {});
+
+//         if (!lastToken) return console.log("Token kosong!");
+
+//         // Tembak ke Python Jembatan
+//         try {
+//             const response = await axios.post('http://127.0.0.1:5000/tp', {
+//                 token: lastToken
+//             });
+//             console.log("✅ Python merespon:", response.data.status);
+//         } catch (err) {
+//             console.log("❌ Gagal kontak Python! Pastiin bridge.py udah jalan.");
+//         }
+//     }
+
+    // Taruh di baris paling bawah index.js
+
+
+// });
+
 client.login(process.env.DISCORD_TOKEN);
