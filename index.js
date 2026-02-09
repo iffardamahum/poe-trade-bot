@@ -67,7 +67,7 @@ async function sendToOverlay(sellerName, hideoutToken) {
 // 3. Event: Pas Bot berhasil Online
 
 client.once('ready', () => {
-  console.log(`Mantap Bro! Bot ${client.user.tag} udah bangun!`);
+  console.log(`Bot ${client.user.tag} ready`);
 });
 
 client.on('messageCreate', async (message) => {

@@ -5,18 +5,18 @@ async function getMyItem() {
         .from('Item')
         .select('itemName, itemType')
         .single();
-  
 
-    if (error){
+
+    if (error) {
         console.error("error njir:", error.message);
-    return null;
+        return null;
 
     }
 
-return data;
+    return data;
 
-    }
+}
 
-    
-module.exports = {getMyItem};
+
+module.exports = { getMyItem };
 

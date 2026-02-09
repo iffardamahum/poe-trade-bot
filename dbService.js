@@ -7,16 +7,16 @@ async function getMyCookie() {
         .single();
 
 
-    if (error){
+    if (error) {
         console.error("error njir:", error.message);
-    return null;
+        return null;
 
     }
 
-return data;
+    return data;
 
-    }
+}
 
 
 
-module.exports = {getMyCookie};
+module.exports = { getMyCookie };

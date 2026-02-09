@@ -3,20 +3,20 @@ const supabase = require('./supabaseclient');
 async function getMyTrade() {
     const { data, error } = await supabase
         .from('bot_settings')
-        .select('hideout_token, seller_name' )
+        .select('hideout_token, seller_name')
         .single();
 
 
-    if (error){
+    if (error) {
         console.error("error njir:", error.message);
-    return null;
+        return null;
 
     }
 
-return data;
+    return data;
 
-    }
+}
 
 
 
-module.exports = {getMyTrade};
+module.exports = { getMyTrade };

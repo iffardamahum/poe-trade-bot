@@ -15,7 +15,7 @@
 
         ipcRenderer.on('update-trade', (event, data) => {
             const btn = document.getElementById('tpBtn');
-            btn.innerHTML = `✈️ TELEPORT KE ${data.seller}`;
+            btn.innerHTML = ` TELEPORT KE ${data.seller}`;
 
             btn.onclick = () => {
                 // Kita bersihin tokennya dari spasi yang mungkin nyelip
