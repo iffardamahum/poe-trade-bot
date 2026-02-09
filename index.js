@@ -53,14 +53,14 @@ const client = new Client({
 });
 
 async function sendToOverlay(sellerName, hideoutToken) {
-    const { error } = await supabase
-        .from('trade') // Nama tabel sesuai screenshot lo
-        .insert([
-            { seller_name: sellerName, hideout_token: hideoutToken }
-        ]);
+  const { error } = await supabase
+    .from('trade') // Nama tabel sesuai screenshot 
+    .insert([
+      { seller_name: sellerName, hideout_token: hideoutToken }
+    ]);
 
-    if (error) console.log("Gagal lapor ke Supabase:", error.message);
-    else console.log(`🚀 Sinyal dikirim ke Overlay! Seller: ${sellerName}`);
+  if (error) console.log("Gagal lapor ke Supabase:", error.message);
+  else console.log(` Sinyal dikirim ke Overlay, Seller: ${sellerName}`);
 };
 
 
@@ -74,12 +74,12 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
   if (message.content === '!ping') {
-    message.reply('PONG! Bot lo udah idup nih!');
+    message.reply('PONG!');
   }
 
   if (message.content === '9') {
     const WebSocket = require('ws');
-    message.reply('🔍 Lagi nyari barang di Path of Exile 2 Trade...');
+    message.reply(' Lagi nyari barang di Path of Exile 2 Trade...');
     try {
       let response = await fetch("https://www.pathofexile.com/api/trade2/search/poe2/Fate%20of%20the%20Vaal", {
         method: "POST",
@@ -102,7 +102,7 @@ client.on('messageCreate', async (message) => {
           },
         })
       });
-      
+
 
       const data = await response.json();
       if (data.result && data.result.length > 0) {
@@ -122,28 +122,28 @@ client.on('messageCreate', async (message) => {
           );
 
         message.reply({
-          content: `✅ Ketemu! Query ID: \`${globalqueryID}\`\nSilakan klik tombol di bawah buat liat harganya:`,
+          content: ` Ketemu! Query ID: \`${globalqueryID}\`\nSilakan klik tombol di bawah buat liat harganya:`,
           components: [row]
         });
       } else {
-        message.reply('❌ Gak nemu barangnya, coba cek lagi filter lo.');
+        message.reply(' Gak nemu barangnya, coba cek lagi filter lo.');
       }
     } catch (error) {
       console.error(error);
-      message.reply('ERR: Gagal nembak API. Cek terminal lo!');
+      message.reply('ERR: Gagal nembak API. Cek terminal');
     }
   }
-  
 
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
+
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
+  //////////////////////////////////////
 
 
   if (message.content === '7') {
@@ -174,7 +174,7 @@ client.on('messageCreate', async (message) => {
             const detailRes = await fetch(fetchURL, {
               method: 'GET',
               headers: {
-                "Cookie": `POESESSID=${globalCookie.POESESSID}` ,
+                "Cookie": `POESESSID=${globalCookie.POESESSID}`,
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Accept": "application/json",
                 "X-Requested-With": "XMLHttpRequest",
@@ -192,7 +192,7 @@ client.on('messageCreate', async (message) => {
               const itemDisplayName = item.item.name || item.item.typeLine;
               const hideoutToken = item.listing.hideout_token;
               await sendToOverlay(sellerName, hideoutToken);
-         
+
               lastToken = hideoutToken;
 
               // Console log biar lo tau barangnya masuk
@@ -205,14 +205,14 @@ client.on('messageCreate', async (message) => {
               //   .addComponents(
               //     new ButtonBuilder()
               //       .setCustomId('gas_loncat') // Kita titip tokennya di sini
-              //       .setLabel(`✈️ TRAVEL TO ${sellerName}`)
+              //       .setLabel(` TRAVEL TO ${sellerName}`)
               //       .setStyle(ButtonStyle.Primary), // Pake tombol biru biasa, bukan Link
               //   );
 
               // message.channel.send({ content: `Ketemu barang!`, components: [row] });
 
               // await message.channel.send({
-              //   content: `📦 **BARANG MASUK!**\n` +
+              //   content: ` **barang masuk**\n` +
               //    `Seller: \`${sellerName}\`\n` +
               //    `Harga: ${item.listing.price.amount} ${item.listing.price.currency}\n\n` +
               //    `**KLIK LINK DI BAWAH BUAT TP:**\n` +
@@ -232,29 +232,29 @@ client.on('messageCreate', async (message) => {
     }
   }
 }),
-// client.on('interactionCreate', async (interaction) => {
-//     if (!interaction.isButton()) return;
+  // client.on('interactionCreate', async (interaction) => {
+  //     if (!interaction.isButton()) return;
 
-//     if (interaction.customId === 'gas_loncat') {
-//         // Biar Discord gak 'Interaction Failed'
-//         await interaction.deferUpdate().catch(() => {});
+  //     if (interaction.customId === 'gas_loncat') {
+  //         // Biar Discord gak 'Interaction Failed'
+  //         await interaction.deferUpdate().catch(() => {});
 
-//         if (!lastToken) return console.log("Token kosong!");
+  //         if (!lastToken) return console.log("Token kosong!");
 
-//         // Tembak ke Python Jembatan
-//         try {
-//             const response = await axios.post('http://127.0.0.1:5000/tp', {
-//                 token: lastToken
-//             });
-//             console.log("✅ Python merespon:", response.data.status);
-//         } catch (err) {
-//             console.log("❌ Gagal kontak Python! Pastiin bridge.py udah jalan.");
-//         }
-//     }
+  //         // Tembak ke Python Jembatan
+  //         try {
+  //             const response = await axios.post('http://127.0.0.1:5000/tp', {
+  //                 token: lastToken
+  //             });
+  //             console.log(" respon:", response.data.status);
+  //         } catch (err) {
+  //             console.log(" Gagal kontak Python! Pastiin bridge.py udah jalan.");
+  //         }
+  //     }
 
-    // Taruh di baris paling bawah index.js
+  // Taruh di baris paling bawah index.js
 
 
-// });
+  // });
 
-client.login(process.env.DISCORD_TOKEN);
+  client.login(process.env.DISCORD_TOKEN);

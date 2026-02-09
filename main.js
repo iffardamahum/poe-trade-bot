@@ -28,7 +28,7 @@ async function createWindow() {
         const myCookie = {
             url: 'https://www.pathofexile.com',
             name: 'POESESSID',
-            cookie: globalCookie, // Kita paksa jadi string & hapus spasi nyelip
+            cookie: globalCookie,
             domain: '.pathofexile.com',
             path: '/',
             secure: true,
@@ -38,7 +38,7 @@ async function createWindow() {
 
         try {
             await session.defaultSession.cookies.set(myCookie);
-            console.log("🍪 Cookie injected ke session!");
+            console.log(" Cookie injected ");
             console.log(myCookie);
         } catch (error) {
             console.error("Gagal inject cookie:", error);
